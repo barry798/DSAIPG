@@ -4,6 +4,8 @@
 
 package com.phasmidsoftware.dsaipg.projects.mcts.tictactoe;
 
+import com.phasmidsoftware.dsaipg.projects.mcts.connect4.Connect4;
+import com.phasmidsoftware.dsaipg.projects.mcts.core.Move;
 import com.phasmidsoftware.dsaipg.projects.mcts.core.Node;
 import com.phasmidsoftware.dsaipg.projects.mcts.core.State;
 
@@ -51,7 +53,7 @@ public class TicTacToeNode implements Node<TicTacToe> {
      * @param state the State for the new chile.
      */
     public void addChild(State<TicTacToe> state) {
-        children.add(new TicTacToeNode(state));
+        children.add(new TicTacToeNode(state, this));
     }
 
     /**
@@ -80,11 +82,11 @@ public class TicTacToeNode implements Node<TicTacToe> {
         return playouts;
     }
 
-    public TicTacToeNode(State<TicTacToe> state) {
-        this.state = state;
-        children = new ArrayList<>();
-        initializeNodeData();
-    }
+//    public TicTacToeNode(State<TicTacToe> state) {
+//        this.state = state;
+//        children = new ArrayList<>();
+//        initializeNodeData();
+//    }
 
     private void initializeNodeData() {
         if (isLeaf()) {
@@ -94,12 +96,84 @@ public class TicTacToeNode implements Node<TicTacToe> {
                 wins = 2; // CONSIDER check that the winner is the correct player. We shouldn't need to.
             else
                 wins = 1; // a draw.
+        } else {
+            Collection<State<TicTacToe>> childrenStates = this.state().moves(this.state().player())
+                    .stream()
+                    .map(this.state()::next)
+                    .toList();
+            for (State<TicTacToe> state : childrenStates) {
+                this.addChild(state);
+            }
         }
     }
+    public boolean visitedAllMoves() {
+        boolean visited = true;
+        for(Node<TicTacToe> child : children){
+            if(child.playouts() == 0){
+                visited = false;
+            }
+        }
+        return visited;
+    }
 
+
+    public Node<TicTacToe> exploreUnexpandedMoves() {
+        for(Node<TicTacToe> child : children){
+            if(child.playouts() == 0){
+                return child;
+            }
+        }
+        return null;
+    }
+
+    public Node<TicTacToe> ucb(){
+        Node<TicTacToe> maxChild = null;
+        double max = Double.NEGATIVE_INFINITY;
+
+        for(Node<TicTacToe> child : children){
+            if (child.playouts() == 0) {
+                return child;
+            }
+//            System.out.println("Math.log(child.playouts()):" + Math.log(child.playouts()));
+//            System.out.println("Math.sqrt(2 * Math.log(child.playouts()) / child.playouts():" + Math.sqrt(2 * Math.log(child.playouts()) / child.playouts()));
+//            System.out.println("(double)child.wins() / (double) child.playouts()) + Math.sqrt(2 * Math.log(child.playouts()) / child.playouts():" + ((double)child.wins() / (double) child.playouts()) + Math.sqrt(2 * Math.log(child.playouts()) / child.playouts()));
+
+            double currentUCB = ((double)child.wins() / (double) child.playouts()) + Math.sqrt(2 * Math.log(this.playouts()) / child.playouts());
+            if(currentUCB > max){
+                maxChild = child;
+                max = currentUCB;
+            }
+        }
+        return maxChild;
+    }
+
+    public TicTacToeNode(State<TicTacToe> state) {
+        this(state, null);
+    }
+
+    public TicTacToeNode(State<TicTacToe> state, TicTacToeNode parent) {
+        this.state = state;
+        this.parent = parent;
+        children = new ArrayList<>();
+        initializeNodeData();
+    }
+
+    public TicTacToeNode getParent() {
+        return parent;
+    }
+
+    public void incrementWins(int result) {
+        wins += result;
+    }
+
+    public void incrementPlayouts() {
+        playouts++;
+    }
+    private final TicTacToeNode parent;
     private final State<TicTacToe> state;
     private final ArrayList<Node<TicTacToe>> children;
-
     private int wins;
     private int playouts;
+
+
 }
