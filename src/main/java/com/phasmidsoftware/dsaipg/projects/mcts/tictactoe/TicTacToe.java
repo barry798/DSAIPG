@@ -4,8 +4,13 @@
 
 package com.phasmidsoftware.dsaipg.projects.mcts.tictactoe;
 
+import com.phasmidsoftware.dsaipg.projects.mcts.connect4.Connect4;
+import com.phasmidsoftware.dsaipg.projects.mcts.connect4.Connect4MCTS;
+import com.phasmidsoftware.dsaipg.projects.mcts.connect4.Connect4Node;
+import com.phasmidsoftware.dsaipg.projects.mcts.connect4.Connect4State;
 import com.phasmidsoftware.dsaipg.projects.mcts.core.Game;
 import com.phasmidsoftware.dsaipg.projects.mcts.core.Move;
+import com.phasmidsoftware.dsaipg.projects.mcts.core.Node;
 import com.phasmidsoftware.dsaipg.projects.mcts.core.State;
 
 import java.util.*;
@@ -48,7 +53,13 @@ public class TicTacToe implements Game<TicTacToe> {
         State<TicTacToe> state = start();
         int player = opener();
         while (!state.isTerminal()) {
-            state = state.next(state.chooseMove(player));
+//            state = state.next(state.chooseMove(player));
+            TicTacToeNode node = new TicTacToeNode(state);
+            MCTS mcts = new MCTS(node);
+            Node<TicTacToe> best = mcts.runGame();
+            state = best.state();
+            System.out.println(((TicTacToeState) state).position.render());
+            System.out.println();
             player = 1 - player;
         }
         return state;
