@@ -64,8 +64,9 @@ public class Position {
         if (player == last) throw new RuntimeException("consecutive moves by same player: " + player);
         int[][] matrix = copyGrid();
         if (matrix[x][y] < 0) {
-            // TO BE IMPLEMENTED 
-             return null;
+            // IMPLEMENTED
+            matrix[x][y] = player;
+            return new Position(matrix, count + 1, player);
             // END SOLUTION
         }
         throw new RuntimeException("Position is occupied: " + x + ", " + y);
@@ -81,8 +82,10 @@ public class Position {
         List<int[]> result = new ArrayList<>();
         for (int i = 0; i < gridSize; i++)
             for (int j = 0; j < gridSize; j++)
-                if (grid[i][j] < 0)
-                    // TO BE IMPLEMENTED 
+                if (grid[i][j] < 0) {
+                    result.add(new int[]{i, j});
+                }
+                    // IMPLEMENTED
          ;
         // END SOLUTION
         return result;
@@ -144,7 +147,55 @@ public class Position {
      * @return true if there are three cells in a line that are the same and equal to the last player.
      */
     boolean threeInARow() {
-        // TO BE IMPLEMENTED 
+        // IMPLEMENTED
+        for(int i = 0; i < gridSize; i++){//check each row
+            int[] row = projectRow(i);
+            for(int j = 0; j < row.length; j++){//check each number in this row
+                if(xxx[j] == row[j]){ //xxx = new int[]{last, last, last};
+                    if(j == 2){//last number in the row == last
+                        return true;
+                    }
+                    continue;//check next number in the row
+                } else {//different number
+                    break;
+                }
+            }
+        }
+
+        for(int i = 0; i < gridSize; i++){//check each column
+            int[] Col = projectCol(i);
+            for(int j = 0; j < Col.length; j++){//check each number in this column
+                if(xxx[j] == Col[j]){ //xxx = new int[]{last, last, last};
+                    if(j == 2){//last number in the Col == last
+                        return true;
+                    }
+                    continue;//check next number in the Col
+                } else {//different number
+                    break;
+                }
+            }
+        }
+
+        for(int i = 0; i < 2; i++){//check each diagonals
+            int[] Diag;
+            if(i == 0){
+                Diag = projectDiag(false);
+            } else {
+                Diag = projectDiag(true);
+            }
+
+            for(int j = 0; j < Diag.length; j++){//check each number in this diagonal
+                if(xxx[j] == Diag[j]){ //xxx = new int[]{last, last, last};
+                    if(j == 2){//last number in the diagonal == last
+                        return true;
+                    }
+                    continue;//check next number in the diagonal
+                } else {//different number
+                    break;
+                }
+            }
+        }
+
          return false;
         // END SOLUTION
     }
